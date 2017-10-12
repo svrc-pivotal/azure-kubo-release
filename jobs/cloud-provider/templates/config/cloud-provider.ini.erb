@@ -10,7 +10,11 @@ node-tags="<%= p('cloud-provider.gce.worker-node-tag') %>"
   <% if provider_type == "vsphere" %>
 [Global]
 user="<%= p('cloud-provider.vsphere.user') %>"
-password="<%= p('cloud-provider.vsphere.password') %>"
+<% 
+   password = p('cloud-provider.vsphere.password')
+   password = password.gsub('\\', '\\\\') 
+%>
+password="<%= password %>"
 server="<%= p('cloud-provider.vsphere.server') %>"
 port="<%= p('cloud-provider.vsphere.port') %>"
 insecure-flag="<%= p('cloud-provider.vsphere.insecure-flag') %>"
