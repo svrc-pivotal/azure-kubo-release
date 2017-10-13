@@ -21,6 +21,9 @@ properties:
     description: The password for the kubelet user
   tls.kubernetes:
     description: "Certificate and private key for the Kubernetes master"
+  authorization-mode:
+    description: "ABAC (attribute-based access control) , RBAC (role-based access control), or BOTH (default)"
+    default: BOTH
   backend_port:
     example: 80
     default: 1234
