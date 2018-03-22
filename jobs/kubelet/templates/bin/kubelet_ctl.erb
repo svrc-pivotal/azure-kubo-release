@@ -65,6 +65,8 @@ start_kubelet() {
   if [[ "gce" == "$cloud_provider" ]]; then
     # The hostname needs to be set to the instance name so the gce cloud provider can manage the instance
     hostname_override=$(curl http://metadata.google.internal/computeMetadata/v1/instance/name -H "Metadata-Flavor: Google")
+  elif [["azure" == "$cloud_provider" ]]; then
+    hostname_override=
   else
     hostname_override=<%= spec.ip %>
   fi
@@ -87,11 +89,12 @@ start_kubelet() {
     --docker-endpoint="${DOCKER_SOCKET}" \
     --docker="${DOCKER_SOCKET}" \
     --fail-swap-on=false \
+    <% if
     --hostname-override=${hostname_override} \
     --keep-terminated-pod-volumes=false \
     --kubeconfig=/var/vcap/jobs/kubelet/config/kubeconfig \
     --network-plugin=cni \
-    --node-labels=<%= labels %>"$zone_label" \
+    --node-labels=<%= labels %>"$zone_label" \x
     --read-only-port 0 \
     --serialize-image-pulls=false \
     --tls-cert-file=/var/vcap/jobs/kubelet/config/kubelet.pem \

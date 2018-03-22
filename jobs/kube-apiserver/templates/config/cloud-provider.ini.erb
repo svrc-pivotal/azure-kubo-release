@@ -56,6 +56,7 @@ securityGroupName: <%= cloud_provider.p('cloud-provider.azure.network-security-g
 <%  cloud_provider.if_p('cloud-provider.azure.route-table-name') do | route_table| %>
    <%= route_table %>
 <%  end %>
+useInstanceMetadata: true
 primaryAvailabilitySetName: <%= cloud_provider.p('cloud-provider.azure.availability-set') %>
       <%
       elsif provider_type == 'openstack'
