@@ -93,7 +93,13 @@ start_kubelet() {
     --keep-terminated-pod-volumes=false \
     --kubeconfig=/var/vcap/jobs/kubelet/config/kubeconfig \
     --network-plugin=cni \
-    --node-labels=<%= labels %>"$zone_label" \x
+    --node-labels=<%= labels %>"$zone_label" \
+    <% if_link('cloud-provider') do |cloud_provider| 
+         if cloud_provider.p('cloud-provider.type') == 'azure' do %>
+    --node.ip=<%=#{spec.ip}"%>
+    <%   end 
+       end
+    %>
     --read-only-port 0 \
     --serialize-image-pulls=false \
     --tls-cert-file=/var/vcap/jobs/kubelet/config/kubelet.pem \
