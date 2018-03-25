@@ -66,6 +66,7 @@ start_kubelet() {
     # The hostname needs to be set to the instance name so the gce cloud provider can manage the instance
     hostname_override=$(curl http://metadata.google.internal/computeMetadata/v1/instance/name -H "Metadata-Flavor: Google")
   elif [[ "azure" == "$cloud_provider" ]]; then
+    # K8s 1.9 Azure provider assumes  the hostname == nodename and is required to resolve the VM instance ID
     hostname_override=
   else
     hostname_override=<%= spec.ip %>
@@ -94,12 +95,6 @@ start_kubelet() {
     --kubeconfig=/var/vcap/jobs/kubelet/config/kubeconfig \
     --network-plugin=cni \
     --node-labels=<%= labels %>"$zone_label" \
-    <% if_link('cloud-provider') do |cloud_provider| 
-         if cloud_provider.p('cloud-provider.type') == 'azure' do %>
-    --node.ip=<%=#{spec.ip}"%>
-    <%   end 
-       end
-    %>
     --read-only-port 0 \
     --serialize-image-pulls=false \
     --tls-cert-file=/var/vcap/jobs/kubelet/config/kubelet.pem \

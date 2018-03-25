@@ -1,0 +1,11 @@
+#!/bin/bash -e
+
+PATH=/var/vcap/packages/jq/bin/:$PATH
+
+# This joins the pre-generaed BOSH DNS list with the every-60-seconds kubectl nodes list.  
+# The join/common field is the InternalIP.  
+# It then mandles the results to make the hostname the key and BOSH DNS (in an array) the value, 
+# per the aliases.json format
+jq -s '[ .[0] + .[1] | group_by(.InternalIP)[] | add ]' /var/vcap/jobs/node-dns-aliases/config/nodelist /var/vcap/jobs/node-dns-aliases/config/bosh_dns_list | jq '.[] | to_entries | (map (select (.key == "BOSH_DNS")) | map( .value )) as $dns |  map (select (.key == "Hostname")) | map ({ (.value) : $dns  } ) | .[] ' | jq -s 'add' > /var/vcap/jobs/node-dns-aliases/dns/aliases.json
+
+monit restart bosh-dns

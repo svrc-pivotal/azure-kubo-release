@@ -1,0 +1,10 @@
+#!/bin/bash -e
+
+PATH=/var/vcap/packages/jq/bin/:$PATH
+
+[ -z "$DEBUG" ] || set -x
+
+kubectl="/var/vcap/packages/kubernetes/bin/kubectl --kubeconfig=/var/vcap/jobs/node-dns-aliases/config/kubeconfig"
+
+# Populate the node list before starting
+${kubectl} get nodes -o json | jq '[ .items[].status.addresses | [ .[] | { "key": .type, "value": .address }] | from_entries ]' > /var/vcap/jobs/node-dns-aliases/config/nodelist
