@@ -1,6 +1,0 @@
-<%=
-
-aliases = link('kubernetes-workers').instances.map { |instance| Hash[ "InternalIP"  , IPSocket.getaddress(instance.address),  "BOSH_DNS" ,instance.address   ] }
-
-JSON.dump(aliases)
-%>

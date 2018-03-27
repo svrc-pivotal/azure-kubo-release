@@ -9,19 +9,14 @@ templates:
   bin/pre-start.erb: bin/pre-start
   config/ca.pem.erb: config/ca.pem
   config/kubeconfig.erb: config/kubeconfig
-  config/bosh_dns_list.erb: config/bosh_dns_list
-  
+
 packages:
 - kubernetes
 - jq
 - pid_utils
-
-consumes:
-- name: kubernetes-workers
-  type: kubernetes-workers
-
+  
 properties:
   tls.kubernetes:
-    description: Certificate and private key for the Kubernetes master
+      description: "Certificate and private key for the Kubernetes master"
   api-token:
     description: The token to access Kubernetes API
