@@ -4,10 +4,17 @@ A [BOSH](http://bosh.io/) release for [Kubernetes](http://kubernetes.io).  Forme
 - **Slack**: #cfcr on https://slack.cloudfoundry.org
 - **Pivotal Tracker**: https://www.pivotaltracker.com/n/projects/2093412
 
+This is a fork for evolving Azure support pending PRs to kubo-release and kubo-deployment.
+
+Note: Some form of Azure support is expected to be committed to the upstream in Fall of 2018, which may or may not include content from these repositories. This is an unoffical fork for use by users that wish to pursue and explore CFCR on Azure before the upstream supports it.
+
 ## Prerequisites
-- A BOSH Director configured with UAA, Credhub, and BOSH DNS.
-- [kubo-release](https://github.com/cloudfoundry-incubator/kubo-release)
-- [kubo-deployment](https://github.com/cloudfoundry-incubator/kubo-deployment)
+- A BOSH Director configured with UAA, Credhub, and BOSH DNS.   If this sounds annoying, the easiest single-command option is [BOSH Bootloader](https://github.com/cloudfoundry/bosh-bootloader).  
+- **For Azure users**, I recommend enabling Managed Disks in your BOSH director via the [appropriate ops file](https://raw.githubusercontent.com/cloudfoundry/bosh-deployment/master/azure/use-managed-disks.yml).  
+- Set BOSH DNS to Azure standard **168.63.129.16** via the [dns ops file](https://github.com/cloudfoundry/bosh-deployment/blob/master/misc/dns.yml) as the Azure Kubernetes cloud provider requires Azure private DNS domains *(\*.internal.cloudapp.net)* to be resolvable.
+- **If you must bring-your-own DNS**, ping me on Slack (@svrc on CF slack, @scharlton on Pivotal slack) to work out the details.   In short, you need to support DDNS and add a DHCP client exit hook to run `nsupdate` against your DNS server (e.g. [this article from Microsoft](https://docs.microsoft.com/en-us/azure/virtual-network/virtual-networks-name-resolution-ddns)).   Each K8s node hostname must be DNS resolvable, and **must also be the Azure VM name** which is also the BOSH Agent ID. 
+- [azure-kubo-release](https://github.com/svrc-pivotal/azure-kubo-release)
+- [azure-kubo-deployment](https://github.com/svrc-pivotal/azure-kubo-deployment)
 - Accessing the master:
   - **Single Master:** Set up a DNS name pointing to your master's IP address
   - **Multiple Masters:** A TCP load balancer for your master nodes.
@@ -24,10 +31,10 @@ A [BOSH](http://bosh.io/) release for [Kubernetes](http://kubernetes.io).  Forme
 
 ### Single Master
 
-1. Upload the [latest Xenial stemcell](https://bosh.io/stemcells/#ubuntu-xenial) to the director.
+1. Upload the [latest Xenial stemcell](https://github.com/svrc-pivotal/azure-kubo-deployment/releases/download/stemcell-98.0/bosh-stemcell-98.0-azure-hyperv-ubuntu-xenial-go_agent.tgz) to the director.  Currently for Azure users this is 98.0 in this repo's [releases](https://github.com/svrc-pivotal/azure-kubo-deployment/releases), which is a custom stemcell including the latest [BOSH agent fix](https://github.com/cloudfoundry/bosh-agent/pull/174) thanks to [andyliuliming](https://github.com/andyliuliming) from Microsoft.  
 1. Upload the latest kubo-release to the director.
     ```
-    bosh upload-release https://bosh.io/d/github.com/cloudfoundry-incubator/kubo-release
+    bosh upload-release https://github.com/svrc-pivotal/azure-kubo-deployment/releases/download/0.20.0.azure%2Bdev.2/kubo-release-0.20.0.azure+dev.2.tgz
     ```
 1. Deploy
 	```
@@ -49,10 +56,10 @@ A [BOSH](http://bosh.io/) release for [Kubernetes](http://kubernetes.io).  Forme
 
 ### Three Masters
 
-1. Upload the [latest Xenial stemcell](https://bosh.io/stemcells/#ubuntu-xenial) to the director.
+1. Upload the [latest Xenial stemcell](https://github.com/svrc-pivotal/azure-kubo-deployment/releases/download/stemcell-98.0/bosh-stemcell-98.0-azure-hyperv-ubuntu-xenial-go_agent.tgz) to the director. Currently for Azure users this is 98.0 in this repo's releases, which is a custom stemcell including the latest BOSH agent fix thanks to [andyliuliming](https://github.com/andyliuliming) from Microsoft.
 1. Upload the latest kubo-release to the director.
     ```
-    bosh upload-release https://bosh.io/d/github.com/cloudfoundry-incubator/kubo-release
+    bosh upload-release https://github.com/svrc-pivotal/azure-kubo-deployment/releases/download/0.20.0.azure%2Bdev.2/kubo-release-0.20.0.azure+dev.2.tgz
     ```
 1. Deploy
 	```
@@ -73,14 +80,17 @@ A [BOSH](http://bosh.io/) release for [Kubernetes](http://kubernetes.io).  Forme
 	```
 	bosh -d cfcr run-errand smoke-tests
 	```
+## Adding the Azure Cloud Config
+1. Deploy (or re-deploy) with the following options, providing an azure.yml variable file for the cloud provider variables.
+	```
+	bosh deploy -d cfcr manifests/cfcr.yml \
+	  -o manifests/ops-files/add-vm-extensions-to-master.yml \
+	  -o manifests/ops-files/add-hostname-to-master-certificate.yml \
+	  -o manifests/ops-files/iaas/azure/cloud-provider.yml
+	  -v api-hostname=[LOADBALANCER-ADDRESS]
+	  -l azure.yml
+	```
 
-### BOSH Lite
-CFCR clusters on BOSH Lite are intended for development. We run the [deploy_cfcr_lite](https://github.com/cloudfoundry-incubator/kubo-deployment/blob/master/bin/deploy_cfcr_lite) script to provision a cluster with the latest stemcell and master of kubo-release.
-
-```
-cd kubo-deployment
-./bin/deploy_cfcr_lite
-```
 ## Accessing the CFCR Cluster with kubectl
 
 1. Login to the Credhub Server that stores the cluster's credentials:
@@ -104,8 +114,8 @@ cd kubo-deployment
 We are no longer supporting the following documentation for deploying BOSH and CFCR
 * https://docs-cfcr.cfapps.io
 
-The [deploy_bosh](https://github.com/cloudfoundry-incubator/kubo-deployment/blob/master/bin/deploy_bosh)
-and [deploy_k8s](https://github.com/cloudfoundry-incubator/kubo-deployment/blob/master/bin/deploy_k8s)
+The [deploy_bosh](https://github.com/svrc-pivotal/azure-kubo-deployment/blob/master/bin/deploy_bosh)
+and [deploy_k8s](https://github.com/svrc-pivotal/azure-kubo-deployment/blob/master/bin/deploy_k8s)
 scripts in the `kubo-deployment` repository are now deprecated.
 
 ### Heapster
