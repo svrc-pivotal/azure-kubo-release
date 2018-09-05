@@ -27,17 +27,22 @@ Note: Some form of Azure support is expected to be committed to the upstream in 
   - Note: the cloud-config properties can be customized by applying ops-files. See `manifests/ops-files` for some examples
   - If using loadbalancers then apply this `vm_extension` called `cfcr-master-loadbalancer` to the cloud-config to add the instances to your loadbalancers. See [BOSH documentation](https://bosh.io/docs/cloud-config/#vm-extensions) for information on how to configure loadbalancers.
 
-## Deploying CFCR
+#### Hardware Requirements
+Kubernetes uses etcd as its datastore. The official infrastructure requirements and example configurations for the etcd cluster can be found [here](https://github.com/etcd-io/etcd/blob/master/Documentation/op-guide/hardware.md).
 
-### Single Master
+## Deploying CFCR
 
 1. Upload the [latest Xenial stemcell](https://github.com/svrc-pivotal/azure-kubo-deployment/releases/download/stemcell-98.0/bosh-stemcell-98.0-azure-hyperv-ubuntu-xenial-go_agent.tgz) to the director.  Currently for Azure users this is 98.0 in this repo's [releases](https://github.com/svrc-pivotal/azure-kubo-deployment/releases), which is a custom stemcell including the latest [BOSH agent fix](https://github.com/cloudfoundry/bosh-agent/pull/174) thanks to [andyliuliming](https://github.com/andyliuliming) from Microsoft.  
 1. Upload the latest kubo-release to the director.
     ```
     bosh upload-release https://github.com/svrc-pivotal/azure-kubo-deployment/releases/download/0.20.0.azure%2Bdev.2/kubo-release-0.20.0.azure+dev.2.tgz
     ```
+
 1. Deploy
-	```
+
+    ##### Option 1. Single Master
+
+	```bash
 	cd kubo-deployment
 
 	bosh deploy -d cfcr manifests/cfcr.yml \
@@ -45,16 +50,8 @@ Note: Some form of Azure support is expected to be committed to the upstream in 
 	  -o manifests/ops-files/add-hostname-to-master-certificate.yml \
 	  -v api-hostname=[DNS-NAME]
 	```
-1. Add kubernetes system components
-	```
-	bosh -d cfcr run-errand apply-specs
-	```
-1. Run the following to confirm the cluster is operational
-	```
-	bosh -d cfcr run-errand smoke-tests
-	```
 
-### Three Masters
+    ##### Option 2. Three Masters
 
 1. Upload the [latest Xenial stemcell](https://github.com/svrc-pivotal/azure-kubo-deployment/releases/download/stemcell-98.0/bosh-stemcell-98.0-azure-hyperv-ubuntu-xenial-go_agent.tgz) to the director. Currently for Azure users this is 98.0 in this repo's releases, which is a custom stemcell including the latest BOSH agent fix thanks to [andyliuliming](https://github.com/andyliuliming) from Microsoft.
 1. Upload the latest kubo-release to the director.
@@ -71,11 +68,16 @@ Note: Some form of Azure support is expected to be committed to the upstream in 
 	  -v api-hostname=[LOADBALANCER-ADDRESS]
 	```
 
-  *Note: Loadbalancer address should be the external address (hostname or IP) of the loadbalancer you have configured.*
-1. Add kubernetes system components
-	```
-	bosh -d cfcr run-errand apply-specs
-	```
+	*Note: Loadbalancer address should be the external address (hostname or IP) of the loadbalancer you have configured.*
+
+   Check additional configurations, such as setting Kubernetes cloud provider, in [docs](./docs/cloud-provider.md).
+
+1. Add Kubernetes system components
+
+    ```bash
+    bosh -d cfcr run-errand apply-specs
+    ```
+
 1. Run the following to confirm the cluster is operational
 	```
 	bosh -d cfcr run-errand smoke-tests
@@ -107,6 +109,11 @@ Note: Some form of Azure support is expected to be committed to the upstream in 
 
 	./bin/set_kubeconfig <DIRECTOR_NAME>/cfcr https://[DNS-NAME-OR-LOADBALANCER-ADDRESS]:8443
 	```
+
+## Monitoring
+
+Follow the recommendations in [etcd's documentation](https://github.com/etcd-io/etcd/blob/master/Documentation/metrics.md) for monitoring etcd
+metrics.
 
 ## Deprecations
 

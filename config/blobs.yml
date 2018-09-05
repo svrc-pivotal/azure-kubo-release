@@ -1,7 +1,7 @@
-cni/cni-amd64-v0.5.2.tgz:
-  size: 14085755
-  object_id: 31cb39af-c33d-4df8-4d45-c02541806e39
-  sha: 71f411080245aa14d0cc06f6824e8039607dd9e9
+cni/cni-plugins-amd64-v0.7.1.tgz:
+  size: 17108856
+  object_id: 50dc58eb-107d-483a-4e37-5a243ffed520
+  sha: fb29e20401d3e9598a1d8e8d7992970a36de5e05
 cni/util-linux_2.27.1-6ubuntu3_amd64.deb:
   size: 847730
   object_id: 27eb3ec3-220f-4a25-6c4f-ec219c37ac8d
@@ -20,11 +20,16 @@ conntrack/libnetfilter-conntrack3_1.0.4-1.deb:
   sha: 743b497bd6a6491a8cad11c04103e55c7a9cc93c
 container-images/coredns_coredns:1.2.0.tgz:
   size: 9997810
-  sha: ea43efdef012ea8526df59cca411069ea357a269
+  object_id: aa4d0f19-0dea-4cc0-561e-2c665b0e849c
+  sha: 34fd25c3a1140b4d59390f57bd17977a64af26c9
 container-images/gcr.io_google_containers_metrics-server-amd64:v0.2.1.tgz:
   size: 11355068
   object_id: 4dbed951-4fca-4708-4853-69264963ffcd
   sha: bc9e58c1fc0ce46648a595ad5041a36abca779ab
+container-images/gcr.io_google_containers_metrics-server-amd64:v0.3.0.tgz:
+  size: 10897327
+  object_id: 908485e6-419b-48d2-7ede-81111b430638
+  sha: e79d57f99ed64c1166fb244d7c69b91e64ed08b0
 container-images/k8s.gcr.io_heapster-amd64:v1.5.4.tgz:
   size: 19797457
   object_id: deb55944-5460-4af5-6b0f-552330fca196
@@ -45,10 +50,10 @@ container-images/k8s.gcr.io_k8s-dns-sidecar-amd64:1.14.10.tgz:
   size: 11294008
   object_id: bbb7dfd6-6ddb-473d-5b78-d75c1fc709a9
   sha: 2197e413d8f22419e01924485c99c0d744a140e7
-container-images/k8s.gcr.io_kubernetes-dashboard-amd64:v1.8.3.tgz:
-  size: 37223437
-  object_id: a6b0aa27-cc63-4207-69dc-8c9a0cba5907
-  sha: a6b943402efcd0a9cdbcdce40bf43f5e299c0156
+container-images/k8s.gcr.io_kubernetes-dashboard-amd64:v1.10.0.tgz:
+  size: 44899678
+  object_id: 437d2094-3906-4125-6277-49d79dce0ad7
+  sha: 9a43488d7fd90ef4db2322f87ab3dbb2b32b805f
 container-images/k8s.gcr.io_pause:3.1.tgz:
   size: 315592
   object_id: f6ba8b90-9a60-454d-73e0-cab4b1c4a554
