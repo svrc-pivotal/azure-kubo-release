@@ -27,26 +27,14 @@ In each example it is assumed that you already have access to a BOSH Director.
     ```
 
 1. Add a cloud config for the deployment with BOSH [generic configs](https://bosh.io/docs/configs/)
+   ```bash
+   $ export KD="path to kubo-deployment repo"
 
-    ```
-    cat <EOF > cc-gcp-vm_extensions.yml
-    vm_extensions:
-    - cloud_properties:
-        service_account: ((cfcr_master_service_account_address))
-      name: ((deployment_name))-master-cloud-properties
-    - cloud_properties:
-        service_account: ((cfcr_worker_service_account_address))
-      name: ((deployment_name))-worker-cloud-properties
-    EOF
-    ```
-
-    ```bash
-    $ export KD="path to kubo-deployment repo"
-
-    $ bosh update-config --name ${deployment_name}  --type cloud \
-    cc-gcp-vm_extensions.yml \
-    --vars-file ${deployment_name}-cc-vars.yml
-    ```
+   $ bosh update-config --name ${deployment_name} \
+      ${KD}/manifests/cloud-config/iaas/gcp/use-vm-extensions.yml \
+      --type cloud \
+      --vars-file ${deployment_name}-cc-vars.yml
+   ```
 
 1. Deploy CFCR
 
@@ -89,28 +77,17 @@ In each example it is assumed that you already have access to a BOSH Director.
     master_iam_instance_profile: <master-iam-profile-name>
     worker_iam_instance_profile: <worker-iam-profile-name>
     cfcr_master_target_pool: <list-of-elbs-for-master>
+    kubernetes_cluster_tag: <tag-for-k8s-cluster-components>
     deployment_name: <deployment-name>
     ```
 
 1. Add a cloud config for the deployment with BOSH [generic configs](https://bosh.io/docs/configs/)
-
-    ```
-    cat <EOF > cc-aws-vm_extensions.yml
-    vm_extensions:
-    - cloud_properties:
-        iam_instance_profile: ((master_iam_instance_profile))
-      name: ((deployment_name))-master-cloud-properties
-    - cloud_properties:
-        iam_instance_profile: ((worker_iam_instance_profile))
-      name: ((deployment_name))-worker-cloud-properties
-    EOF
-    ```
-
     ```bash
     $ export KD="path to kubo-deployment repo"
 
-    $ bosh update-config --name ${deployment_name}  --type cloud \
-    cc-aws-vm_extensions.yml \
+    $ bosh update-config --name ${deployment_name} \
+    ${KD}/manifests/cloud-config/iaas/aws/use-vm-extensions.yml \
+    --type cloud \
     --vars-file ${deployment_name}-cc-vars.yml
     ```
 
@@ -121,6 +98,7 @@ In each example it is assumed that you already have access to a BOSH Director.
     ${KD}/manifests/cfcr.yml \
     -o ${KD}/manifests/ops-files/iaas/aws/cloud-provider.yml \
     -o ${KD}/manifests/ops-files/use-vm-extensions.yml \
+    -o ${KD}/manifests/ops-files/iaas/aws/lb.yml \
     -o ${KD}/manifests/ops-files/rename.yml \
     -v deployment_name=${deployment_name}
     ```
@@ -167,18 +145,8 @@ In each example it is assumed that you already have access to a BOSH Director.
 1. Add (if does not exist) a vSphere specific cloud config  with BOSH [generic configs](https://bosh.io/docs/configs/)
 
     ```bash
-    cat << EOF > cfcr-cc-vm_extension-vsphere.yml
-    vm_extensions:
-    - cloud_properties:
-        vmx_options:
-          disk.enableUUID: "1"
-      name: enable-disk-UUID
-    EOF
-    ```
-
-    ```bash
     $ bosh update-config --name cfcr-cc-vm_extension-vsphere \
-    cfcr-cc-vm_extension-vsphere.yml \
+    ${KD}/manifests/cloud-config/iaas/vsphere/use-vm-extensions.yml \
     --type cloud
     ```
 
@@ -186,20 +154,12 @@ In each example it is assumed that you already have access to a BOSH Director.
 1. Deploy CFCR
 
     ```bash
-    cat << EOF > use-vm-extensions-vsphere-only.yml
-    - type: replace
-      path: /instance_groups/name=worker/vm_extensions?/-
-      value: enable-disk-UUID
-    EOF
-    ```
-
-    ```bash
     $ export KD="path to kubo-deployment repo"
 
     $ bosh deploy -d ${deployment_name} \
     ${KD}/manifests/cfcr.yml \
     -o ${KD}/manifests/ops-files/iaas/vsphere/cloud-provider.yml \
-    -o use-vm-extensions-vsphere-only.yml \
+    -o ${KD}/manifests/ops-files/iaas/vsphere/use-vm-extensions.yml \
     -o ${KD}/manifests/ops-files/rename.yml \
     -v deployment_name=${deployment_name} \
     --vars-file ${deployment_name}-vars.yml
